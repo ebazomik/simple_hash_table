@@ -73,7 +73,7 @@ void deleteHashMap(HashTable *ht) {
 // hash = 17
 int hashFunction(const char *key, unsigned int tableSize) {
   int hash = 0;
-  for (int i = 0; i < strlen(key); i++) {
+  for (unsigned int i = 0; i < strlen(key); i++) {
     hash = (hash * 31 + key[i]) % tableSize;
   }
   return hash;
@@ -81,29 +81,23 @@ int hashFunction(const char *key, unsigned int tableSize) {
 
 // Calculate hash with double hashing (open addressing)
 int getHashWithPreventCollision(const char *key, const HashTable *ht,
-                                const int attempts) {
+                                const int attempt) {
   int index = 0;
-  int tableSize = ht->size;
-  for (int i = 0; i <= attempts; i++) {
-    index = hashFunction(key, tableSize) +
-            (i * hashFunction(key, tableSize)) % tableSize;
-    if (ht->items[index] != NULL)
-      return index;
-  }
-  return -1;
+  unsigned int tableSize = ht->size;
+  index = hashFunction(key, tableSize) + (attempt * hashFunction(key, tableSize)) % tableSize;
+  return index;
 }
 
-void insertItem(HashTable *ht, char *key, char *value) {
+int insertItem(HashTable *ht, char *key, char *value) {
   Item *newItem = createNewItem(key, value);
-  int hash = getHashWithPreventCollision(key, ht, 10);
-  if (hash == -1)
-    return;
+  int hash = getHashWithPreventCollision(key, ht, 0);
   Item *item = ht->items[hash];
-  if (item != NULL) {
+  if (item == NULL) {
     ht->items[hash] = newItem;
     ht->count++;
-  
+    return 0;
   }
+  return 1;
 }
 
 char *search(HashTable *ht, char *key){
@@ -118,10 +112,19 @@ char *search(HashTable *ht, char *key){
   return NULL;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]){
   int tableSize = 101;
   HashTable *ht = createNewHashTable(tableSize);
 
-  // deleteHashMap(ht);
-  int hash = hashFunction(argv[1], tableSize);
+  printf("Item to insert is -> { %s, %s } \n", argv[1], argv[2]);
+
+  int insert = insertItem(ht, argv[1], argv[2]);
+  if(insert) {
+    printf("Error on insert value \n");
+    return 1;
+  }
+  char* value = search(ht, argv[1]);
+  printf("Value insert is -> %s \n", value);
+
+  deleteHashMap(ht);
 }
