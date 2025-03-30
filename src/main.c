@@ -106,6 +106,18 @@ void insertItem(HashTable *ht, char *key, char *value) {
   }
 }
 
+char *search(HashTable *ht, char *key){
+  int hash = getHashWithPreventCollision(key, ht, 0);
+  Item *item = ht->items[hash];
+  if(item != NULL){
+    if(strcmp(item->key, ht->items[hash]->key) == 0){
+      return item->value;
+    }
+    // if item != NULL but keys are different?
+  }
+  return NULL;
+}
+
 int main(int argc, char *argv[]) {
   int tableSize = 101;
   HashTable *ht = createNewHashTable(tableSize);
