@@ -76,13 +76,40 @@ int hashFunction(const char *key, unsigned int tableSize) {
   for (int i = 0; i < strlen(key); i++) {
     hash = (hash * 31 + key[i]) % tableSize;
   }
-  printf("%i \n", hash);
   return hash;
+}
+
+// Calculate hash with double hashing (open addressing)
+int getHashWithPreventCollision(const char *key, const HashTable *ht,
+                                const int attempts) {
+  int index = 0;
+  int tableSize = ht->size;
+  for (int i = 0; i <= attempts; i++) {
+    index = hashFunction(key, tableSize) +
+            (i * hashFunction(key, tableSize)) % tableSize;
+    if (ht->items[index] != NULL)
+      return index;
+  }
+  return -1;
+}
+
+void insertItem(HashTable *ht, char *key, char *value) {
+  Item *newItem = createNewItem(key, value);
+  int hash = getHashWithPreventCollision(key, ht, 10);
+  if (hash == -1)
+    return;
+  Item *item = ht->items[hash];
+  if (item != NULL) {
+    ht->items[hash] = newItem;
+    ht->count++;
+  
+  }
 }
 
 int main(int argc, char *argv[]) {
   int tableSize = 101;
-  // HashTable* ht = createNewHashTable(tableSize);
+  HashTable *ht = createNewHashTable(tableSize);
+
   // deleteHashMap(ht);
   int hash = hashFunction(argv[1], tableSize);
 }
