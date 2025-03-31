@@ -84,7 +84,8 @@ int getHashWithPreventCollision(const char *key, const HashTable *ht,
                                 const int attempt) {
   int index = 0;
   unsigned int tableSize = ht->size;
-  index = hashFunction(key, tableSize) + (attempt * hashFunction(key, tableSize)) % tableSize;
+  index = hashFunction(key, tableSize) +
+          (attempt * hashFunction(key, tableSize)) % tableSize;
   return index;
 }
 
@@ -100,11 +101,11 @@ int insertItem(HashTable *ht, char *key, char *value) {
   return 1;
 }
 
-char *search(HashTable *ht, char *key){
+char *search(HashTable *ht, char *key) {
   int hash = getHashWithPreventCollision(key, ht, 0);
   Item *item = ht->items[hash];
-  if(item != NULL){
-    if(strcmp(item->key, ht->items[hash]->key) == 0){
+  if (item != NULL) {
+    if (strcmp(item->key, ht->items[hash]->key) == 0) {
       return item->value;
     }
     // if item != NULL but keys are different?
@@ -112,19 +113,28 @@ char *search(HashTable *ht, char *key){
   return NULL;
 }
 
-int main(int argc, char *argv[]){
+void removeItem(HashTable *ht, char *key) {
+  int hash = getHashWithPreventCollision(key, ht, 0);
+  Item *item = ht->items[hash];
+  if (strcmp(item->key, key) == 0) {
+    deleteItem(item);
+    ht->count--;
+  }
+}
+
+int main(int argc, char *argv[]) {
   int tableSize = 101;
   HashTable *ht = createNewHashTable(tableSize);
 
   printf("Item to insert is -> { %s, %s } \n", argv[1], argv[2]);
 
   int insert = insertItem(ht, argv[1], argv[2]);
-  if(insert) {
-    printf("Error on insert value \n");
-    return 1;
-  }
-  char* value = search(ht, argv[1]);
+  char *value = search(ht, argv[1]);
   printf("Value insert is -> %s \n", value);
+
+  removeItem(ht, argv[1]);
+  char *value1AfterDelete = search(ht, argv[1]);
+  printf("Value searched after delete is -> %s \n", value1AfterDelete);
 
   deleteHashMap(ht);
 }
